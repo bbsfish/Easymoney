@@ -1,0 +1,239 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: content-box;
+    zoom: 1;
+    font-size: 20px;
+}
+
+/* Variable */
+:root {
+    /* Base */
+    --f: rgb(231, 224, 224);   /* Font Color */
+    --b: rgb(49, 49, 49);   /* Back Ground Color */
+    --t: rgb(114, 49, 49);   /* Thema/Acsent Color */   
+    --t-line: rgb(  6, 199,  85);   /* Thema/Acsent Color (iOS LINE) */   
+}
+
+/* Resets */
+p,a,a:visited,h1,h2,h3,h4,h5,label,li,th,td { color: var(--f); font-weight: 100; }
+li { list-style: none; } a { text-decoration: none; } a:hover { text-decoration: underline; }
+input[type=checkbox] {
+	transform: scale(2);
+	margin: 0 9px 0 5px;
+}
+
+/* Common */
+
+body {
+    background-color: var(--b);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+footer {
+    min-height: 300px;
+}
+
+/* Header */
+header {
+    margin: 10px 0;
+}
+
+.hd-title {
+    text-align: center;
+}
+
+.hd-memu {
+    padding: 10px 0;
+    border-bottom: 2px solid var(--t);
+}
+
+.hd-memu ul {
+    margin: 0 10px;
+    display: flex;
+}
+
+.hd-memu ul label, .hd-memu ul li {
+    display: inline-block;
+    text-align: center;
+}
+
+.hd-memu ul label {
+    width: 130px;
+}
+
+.hd-memu ul label::before { content: "［"; }
+.hd-memu ul label::after { content: "］"; }
+
+.hd-memu ul li {
+    border: 1px solid var(--t);
+    flex: auto;
+}
+
+.hd-memu ul li a {
+    display: block;
+}
+
+#hd-memu-active {
+    background-color: var(--t);
+}
+
+/* ..... */
+header.sub-section {
+    margin: 10px 0;
+    border: 1px dotted var(--t);
+    text-align: center;
+}
+
+hr.sub-section {
+    height: 2px;
+    width: 100%;
+    background-color: var(--t);
+    border: none;
+}
+
+/* index.html : main */
+.mn-menu {
+    padding: 15px 30px;
+}
+
+.mn-menu label {
+    text-align: center;
+    display: block;
+}
+
+.mn-menu ul {
+    border: 2px solid var(--t);
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.mn-menu ul li {
+    text-align: center;
+    background-color: var(--t);
+    margin: 10px 0;
+}
+
+.mn-menu ul li a {
+    display: block;
+    padding: 5px 0;
+}
+
+/* Main */
+form {
+    padding: 15px;
+    /* border-bottom: 1px solid var(--t); */
+}
+form ul li {
+    text-align: center;
+}
+form ul li:last-child {
+    margin-top: 60px;
+}
+form ul label{
+    display: block;
+    border-top: 1px solid var(--f);
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 30px;
+}
+form ul label:first-child {
+    border-top: 0;
+    margin-top: 0;
+}
+.default-chbx {
+    /* width: calc(30%); */
+    text-align: left;
+    display: inline-block;
+    border-top: 0;
+    padding-right: 10px;
+    margin-top: 0;
+}
+
+.values_check_holder::before { content: " [\0a5"; }
+.values_check_holder::after { content: "]"; }
+
+form ul li input:not([type=checkbox]), form ul li select {
+    width: 200px;
+}
+
+.qi-list {
+    position: relative;
+    /* アイテムを横スクロールするには以下のコメントアウトを除去 */
+    /* overflow-x: scroll; */
+    overflow-y: hidden;
+    height: 27px;
+    width: 100%;
+    overflow-wrap: unset;
+    white-space: nowrap;
+    padding: 10px 0 25px 0;
+    scrollbar-width: 5px;
+}
+.qi-item {
+    font-size: smaller;
+    border: 1px solid var(--f);
+    border-radius: 6px;
+    margin: 0 5px;
+    padding: 0px 5px;
+    display: inline-block;
+}
+.qi-item:hover { cursor: pointer; }
+
+.status {
+    text-align: center;
+    color: rgb(241, 39, 39);
+    border: 1px solid var(--t);
+    border-radius: 5px;
+    margin: 0 10px;
+    display: none;
+}
+
+/* table */
+table {
+    margin: 15px 0;
+    border: 2px solid var(--f);
+}
+table * {
+    font-size: .87em;
+    text-align: center;
+    /* border: 1px solid var(--f); */
+}
+
+table thead tr th {
+    border-bottom: 1px solid var(--f);
+}
+table thead tr:first-child th {
+    border: 0px;
+    border-bottom: 1px solid var(--f);
+}
+table thead tr:nth-child(2) th {
+    border: 0px;
+}
+table thead tr:nth-child(3) th {
+    border: 0px;
+    border-bottom: 2px solid var(--f);
+}
+table tbody tr td {
+    border: 0px;
+    border-bottom: 1px solid var(--f);
+}
+table tbody tr th {
+    border-bottom: 1px solid var(--f);
+}
+
+.result-dataview > main {
+    width: 498px;
+    overflow: auto;
+    overflow-y: hidden;
+}
+
+th.cell-n, td.cell-n, th.cell-y, td.cell-y {
+    text-align: right;
+}
+th.cell-y::before, td.cell-y::before {
+    text-align: right;
+    content: "\0a5";
+    margin-right: 5px;
+}
