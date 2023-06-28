@@ -194,14 +194,17 @@ form ul li input:not([type=checkbox]), form ul li select {
 table {
     margin: 15px 0;
     border: 2px solid var(--f);
+    margin-left: auto;
+    margin-right: auto;
 }
 table * {
     font-size: .87em;
-    text-align: center;
+    text-align: left;
     /* border: 1px solid var(--f); */
 }
 
 table thead tr th {
+    text-align: center;
     border-bottom: 1px solid var(--f);
 }
 table thead tr:first-child th {
@@ -230,10 +233,10 @@ table tbody tr th {
 }
 
 th.cell-n, td.cell-n, th.cell-y, td.cell-y {
-    text-align: right;
+    text-align: left;
 }
 th.cell-y::before, td.cell-y::before {
-    text-align: right;
+    text-align: left;
     content: "\0a5";
     margin-right: 5px;
 }
