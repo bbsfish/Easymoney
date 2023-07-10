@@ -16,4 +16,6 @@
 - "LINE_USER_ID"    : 
 
 # 設定
-- 設定ファイル: "properties.js"
+設定ファイル: "properties.js"
+- "AppRootUrl": デプロイしたGASアプリケーションのURL * 主にhttp/index*のform.actionの値に利用される
+- "your-spread-sheet-id-for-logging" -> Loggerでログを書き込むスプレッドシートのＩＤを格納。初回記録時に"Log"という名前のシートが生成される
