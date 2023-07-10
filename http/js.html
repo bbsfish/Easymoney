@@ -1,0 +1,25 @@
+<script>
+    function zeroPad(num, len = 2) {
+        return (Array(len).join('0') + num).slice(-len);
+    }
+
+    function getprm(key, url) {
+        if (!url) url = window.location.href;
+        key = key.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + key + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    window.onload = function () {
+        var w = document.body.clientWidth;
+        var h = document.body.clientHeight;
+        var scale = 980 / w;
+        var transX = (scale - 1) * w / 2 / scale;
+        var transY = (scale - 1) * h / 2 / scale;
+        document.body.style.webkitTransform = "scale(" + scale + ") translate(" + transX + "px, " + transY + "px)";
+    }
+
+</script>

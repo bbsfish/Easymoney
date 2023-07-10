@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <?!=HtmlService.createHtmlOutputFromFile('css.html').getContent(); ?>
+  <?!=HtmlService.createHtmlOutputFromFile('js.html').getContent(); ?>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=100vw, initial-scale=1.0">
+  <title>データ登録</title>
+  <script>
+  </script>
+</head>
+
+<body>
+  <!-- ヘッダー -->
+  <header>
+    <p class="hd-title"><a href="<?!=index ?>">LINE金銭管理</a></p>
+    <nav class="hd-memu">
+      <ul><label>決済情報</label>
+        <li id="hd-memu-active"><a href="<?!=index ?>">登録</a></li>
+        <li><a href="<?!=index ?>?pg=2">カード</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <!-- メインコンテンツ -->
+
+    <!-- 状態表示 -->
+    <p class="status">
+      <?!=statusMessage ?>
+      <style>
+        .status {
+          <?!=statusStyle ?>
+        }
+      </style>
+    </p>
+
+    <!-- フォーム -->
+    <form id="form-registration" method="post" action="<?!=index ?>" onsubmit="return fillcheck()">
+      <ul>
+        <!-- 支払金額 [利用金額] -->
+        <label>支払額<span class="values_check_holder" autocomplete="off" id="total_holder">0</span></label>
+        <li><input id="total" type="number" name="total" placeholder="支払金額" onblur="numFormatChng(this)"></li>
+
+        <!-- 費目 [データ種別A] "A:B"で書き込み -->
+        <label>費目</label>
+        <li>
+          <select name="expense_item">
+            <option value="" disabled selected>費目</option>
+            <option value="食事費">食事費</option>
+            <option value="娯楽費">娯楽費</option>
+            <option value="交通費">交通費</option>
+            <option value="特別費">特別費</option>
+            <option value="医療費">医療費</option>
+            <option value="固定費">固定費</option>
+        </select>
+        </li>
+
+        <!-- コメント [データ種別B] "A:B"で書き込み -->
+        <label>コメント</label>
+        <li>
+          <input type="text" name="cmnt" autocomplete="off" style="width: 90%; max-width: 400px;">
+          <p class="qi-list">
+            <span class="qi-item">食べ物</span>
+            <span class="qi-item">飲み物</span>
+            <span class="qi-item">酒</span>
+            <span class="qi-item">学業</span>
+            <span class="qi-item">プレゼント</span>
+          </p>
+        </li>
+
+        <!-- 日付 -->
+        <label>日付</label>
+        <li>
+          <label class="default-chbx"><input type="checkbox" name="date_today" id="chbx1" checked
+                            onclick="chbx(this)">今日</label>
+          <label class="default-chbx"><input type="checkbox" name="date_yest" id="chbx2"
+                            onclick="chbx(this)">昨日</label>
+          <label class="default-chbx"><input type="checkbox" name="date_manual" id="chbx3"
+                            onclick="chbx(this)">指定</label>
+          <input type="date" name="date" min="" max="">
+        </li>
+
+        <!-- 支払方法 -->
+        <label>支払方法</label>
+        <li>
+          <select name="payway">
+            <option disabled selected>支払方法</option>
+            <option value="現金">現金（現金・振込・プリペイド）</option>
+            <option value="オリコ">カード（オリコ）</option>
+            <option value="ニコス">カード（ニコス）</option>
+            <option value="エポス">カード（エポス）</option>
+          </select>
+        </li>
+
+        <!-- 隠し属性 -->
+        <input type="hidden" name="datatype" value="registration">
+
+        <label></label>
+
+        <!-- 送信ボタン -->
+        <li><input type="submit" value="登録" name="send_btn"></li>
+      </ul>
+    </form>
+  </main>
+  <footer>
+  </footer>
+  <script>
+    const form = document.forms["form-registration"];
+        {
+            {
+                // form-registration : input[name=date] . min & max - values set
+                let today = new Date();
+                let dateMin = new Date(); dateMin.setMonth(today.getMonth() - 3);
+                let dateMax = new Date(); dateMax.setMonth(today.getMonth() + 4);
+                form.date.min = `${dateMin.getFullYear()}-${zeroPad(dateMin.getMonth() + 1)}-${zeroPad(dateMax.getDate())}`;
+                form.date.max = `${dateMax.getFullYear()}-${zeroPad(dateMax.getMonth() + 1)}-${zeroPad(dateMax.getDate())}`;
+            }
+            {
+                const cmnt = document.forms["form-registration"].cmnt;
+                const qiItems = document.getElementsByClassName("qi-item");
+                console.log(qiItems);
+                for (let i = 0; i < qiItems.length; i++) {
+                    qiItems[i].addEventListener("click", function () {
+                        cmnt.value += qiItems[i].innerText;
+                    });
+                }
+            }
+        }
+
+        function chbx(obj) {
+            // form-registration : input[type=checkbox] - Exclusive check function
+            let that = obj;
+            if (document.getElementById(that.id).checked == true) {
+                let boxes = document.querySelectorAll('input[type="checkbox"]');
+
+                for (let i = 0; i < boxes.length; i++) {
+                    boxes[i].checked = false;
+                }
+                document.getElementById(that.id).checked = true;
+            } else {
+                document.getElementById("chbx1").checked = true;
+            }
+        }
+
+        function numFormatChng(obj) {
+            let that = obj;
+            let thatValue = Number(that.value);
+            let thatId = that.id;
+            let targetId = "";
+            if (thatId == "total") targetId = "total_holder";
+            let target = document.getElementById(targetId);
+            target.innerText = thatValue.toLocaleString();
+        }
+
+        function fillcheck() {
+            let consents = [];
+            if (form.date_manual.checked == true && !form.date.value) {
+                window.confirm("[ERR] 不足: 日付(date)");
+                return false;
+            }
+            if (form.payway.selectedIndex == 0) {
+                consents[consents.length] = "支払方法 が 選択されていません";
+            }
+            if (!form.total.value) {
+                window.confirm("[ERR] 不足: 支払額");
+                return false;
+            }
+            if (!form.expense_item.value) {
+                consents[consents.length] = "費目 が 選択されていません";
+            }
+
+            let text = "[ 入力確認 ]\n";
+            for (let c of consents) {
+                text += "- " + c;
+            }
+            text += "\n[OK]を押すと実行します";
+            return window.confirm(text);
+        }
+  </script>
+</body>
+
+</html>

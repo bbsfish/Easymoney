@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <?!=HtmlService.createHtmlOutputFromFile('css.html').getContent(); ?>
+  <?!=HtmlService.createHtmlOutputFromFile('js.html').getContent(); ?>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=100vw, initial-scale=1.0">
+  <title>カード</title>
+  <script>
+  </script>
+</head>
+
+<body>
+  <!-- ヘッダー -->
+  <header>
+    <p class="hd-title"><a href="<?!=index ?>">LINE金銭管理</a></p>
+    <nav class="hd-memu">
+      <ul><label>決済情報</label>
+        <li><a href="<?!=index ?>">登録</a></li>
+        <li id="hd-memu-active"><a href="<?!=index ?>?pg=2">カード</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- メインコンテンツ -->
+
+    <!-- 状態表示 -->
+    <p class="status">
+      <?!=statusMessage ?>
+      <style>
+        .status {
+          <?!=statusStyle ?>
+        }
+      </style>
+    </p>
+
+    <!-- 登録情報 -->
+    <form>
+      <ul>
+        <label>登録状況</label>
+        <?!=cardbillingtables ?>
+        <label></label>
+      </ul>
+    </form>
+
+    <!-- フォーム -->
+    <form id="form-registration" method="post" action="<?!=index ?>" onsubmit="return fillcheck()">
+      <ul>
+        <!-- 支払方法 -->
+        <label>カード</label>
+        <li>
+          <input type="text" name="cardname" autocomplete="off" style="width: 90%; max-width: 400px;">
+          <p class="qi-list">
+            <span class="qi-item">Olive</span>
+            <span class="qi-item">オリコ</span>
+            <span class="qi-item">ニコス</span>
+            <span class="qi-item">エポス</span>
+          </p>
+        </li>
+        <!-- 請求金額 -->
+        <label>請求金額<span class="values_check_holder" autocomplete="off" id="total_holder">0</span></label>
+        <li><input id="total" type="number" name="total" placeholder="請求金額" onblur="numFormatChng(this)"></li>
+
+        <!-- 引落日 -->
+        <label>引落日</label>
+        <li>
+          <input type="date" name="date" min="" max="">
+        </li>
+
+        <!-- コメント -->
+        <label>コメント</label>
+        <li>
+          <input type="text" name="cmnt" autocomplete="off" style="width: 90%; max-width: 400px;">
+          <p class="qi-list">
+            <span class="qi-item">準備日</span>
+            <span class="qi-item">変更有</span>
+          </p>
+        </li>
+
+        <!-- 隠し属性 -->
+        <input type="hidden" name="datatype" value="card_billing_regi">
+
+        <label></label>
+
+        <!-- 送信ボタン -->
+        <li><input type="submit" value="登録" name="send_btn"></li>
+      </ul>
+    </form>
+
+  </main>
+  <footer>
+  </footer>
+  <script>
+    function numFormatChng(obj) {
+      let that = obj;
+      let thatValue = Number(that.value);
+      let thatId = that.id;
+      let targetId = "";
+      if (thatId == "total") targetId = "total_holder";
+      let target = document.getElementById(targetId);
+      target.innerText = thatValue.toLocaleString();
+    }
+    const form = document.forms["form-registration"];
+    {
+      {
+        // form-registration : input[name=date] . min & max - values set
+        let today = new Date();
+        let dateMin = new Date(); dateMin.setMonth(today.getMonth() - 3);
+        let dateMax = new Date(); dateMax.setMonth(today.getMonth() + 4);
+        form.date.min = `${dateMin.getFullYear()}-${zeroPad(dateMin.getMonth() + 1)}-${zeroPad(dateMax.getDate())}`;
+        form.date.max = `${dateMax.getFullYear()}-${zeroPad(dateMax.getMonth() + 1)}-${zeroPad(dateMax.getDate())}`;
+      }
+      {
+        const cardname = document.forms["form-registration"].cardname;
+        const cmnt = document.forms["form-registration"].cmnt;
+        const qiItems = document.getElementsByClassName("qi-item");
+        for (let i = 0; i < qiItems.length; i++) {
+            if (i < 4) {
+                qiItems[i].addEventListener("click", function () {
+                    cardname.value += qiItems[i].innerText;
+                });
+            } else {
+                qiItems[i].addEventListener("click", function () {
+                    cmnt.value += qiItems[i].innerText;
+                });
+            }
+        }
+      }
+    }
+    function fillcheck() {
+      if (form.cardname.value == "") {
+          window.confirm("[必須] カード名");
+          return false;
+      }
+      if (!form.total.value) {
+          window.confirm("[必須] 支払金額");
+          return false;
+      }
+      if (!form.cmnt.value) {
+          return window.confirm("[注意] コメントが空欄ですが, 実行しますか? * 任意");
+      }
+    }
+  </script>
+</body>
+
+</html>
