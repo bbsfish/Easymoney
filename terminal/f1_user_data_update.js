@@ -12,7 +12,7 @@ class f1_user_data_update {
         for (let g of this.template_group) {
             if (g.name != template_group_name) continue;
             let arr = g.id_list.map((v,i)=>{
-                let r = Mydb.select(v);
+                let r = this.mydb.select(v);
                 return r[2]+"="+r[3]
             });
             return g.name + "::^" + arr.join("^");
