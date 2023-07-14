@@ -1,23 +1,21 @@
 class f1_user_data_update {
-    constructor() {
-        this.bookid = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
-        this.db = SpreadSheetsSQL.open(this.bookid, "usrdata.db");
+    constructor(book_id) {
+        this.bookid = book_id;
+        this.mydb = new MyDbms(book_id, "usrdata.db");
         this.template_group = [
             { name: "設定", id_list: ["card_limit", "todays_limit"] },
         ];
     }
 
     template(template_group_name = "") {
+        const Mydb = new MyDbms(this.bookid, "usrdata.db");
         for (let g of this.template_group) {
             if (g.name != template_group_name) continue;
-            let arr = [];
-            for (let id of g.id_list) {
-                let row = this.db.select(["id", "key", "value"]).filter(`id = ${id}`).result();
-                arr.push(
-                    row[0].key + "=" + row[0].value
-                );
-            }
-            return template_group_name + "::^" + arr.join("^");
+            let arr = g.id_list.map((v,i)=>{
+                let r = Mydb.select(v);
+                return r[2]+"="+r[3]
+            });
+            return g.name + "::^" + arr.join("^");
         }
     }
 

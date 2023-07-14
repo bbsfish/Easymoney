@@ -1,9 +1,11 @@
+const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
+const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
+const LineUserId = PropertiesService.getScriptProperties().getProperty("LINE_USER_ID");
 Logger = BetterLog.useSpreadsheet("your-spread-sheet-id-for-logging");
+const AppRootUrl = "https://script.google.com/macros/s/AKfycbxFj8Uq7DuaCl6AWXcGEsaJVyNBa5tFW3KuhE_yICp4QfP0lfT5mB3OtRrG2sZxmf4/exec";
 
 // Preview HTML
 function doGet(e) {
-    const AppRootUrl = "https://script.google.com/macros/s/AKfycbxFj8Uq7DuaCl6AWXcGEsaJVyNBa5tFW3KuhE_yICp4QfP0lfT5mB3OtRrG2sZxmf4/exec";
-
     Logger.log("doGet().GetGET: %s", e);
     try {
         let file = "index.html";
@@ -52,9 +54,6 @@ function show_cardbilling() {
 
 // When Get POST
 function doPost(e) {
-    const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
-    const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
-    const LineUserId = PropertiesService.getScriptProperties().getProperty("LINE_USER_ID");
     Logger.log("doPost().GetPOST: %s", e);
 
     if (String(e.parameters.datatype) == "card_billing_regi") {

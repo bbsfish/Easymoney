@@ -1,0 +1,3 @@
+const commands = [
+    { name: "", argments: [],  }
+];

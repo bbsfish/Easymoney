@@ -4,30 +4,25 @@ function doPost(e) {
     const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
     const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
     try {
-        Logger.log("doPost().GetPOST: %s", e);
         if (e == undefined) throw new Error("doPost().Err: 空の e オブジェクト");
+        Logger.log("doPost().GetPOST: %s", e);
+        const Event = JSON.parse(e.postData.contents).events[0];
+        if (Event.message.type != "text") throw new Error("doPost().Err: 未対応のイベントタイプ");
+        const Lc = new LineBotSDK.Client({ channelAccessToken: AccessToken });
 
-        const event = JSON.parse(e.postData.contents).events[0];
-        if (event.message.type != "text") throw new Error("doPost().Err: 未対応のイベントタイプ");
-        const Posttext = event.message.text; // 受信メッセージ
-        const replytoken = event.replyToken;
-        const lc = new LineBotSDK.Client({ channelAccessToken: AccessToken });
-        let nMessage = ""; // 返信テキスト
-
-        if (Posttext == "設定") {
-            let func = new f1_user_data_update();
-            nMessage = func.template("設定");
-            nMessage = spchar(nMessage);
-            lc.replyMessage(replytoken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
+        if (Event.message.text == "設定") {
+            let func = new f1_user_data_update(BookId);
+            let message = func.template("設定");
+            Lc.replyMessage(Event.replyToken, [{ type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }]);
         }
 
-        if (Posttext == "記帳") {
+        if (Event.message.text == "記帳") {
             let func = new f2_writeout_manregi();
             let quedata = func.getdata();
             if (quedata === false) {
                 nMessage = `[通知]^書き込み待ちのデータはありません.`;
                 nMessage = spchar(nMessage);
-                lc.replyMessage(replytoken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
+                Lc.replyMessage(Event.replyToken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
             } else {
                 let p = quedata["expense_for"].split(":");
                 let n = func.getunwriten();
@@ -55,11 +50,11 @@ function doPost(e) {
                 let db = SpreadSheetsSQL.open(BookId, "usrdata.db");
                 db.updateRows({ value: quedata.id, update: new Date() }, "id = terminal_status");
                 nMessage = spchar(sptrim(nMessage));
-                lc.replyMessage(replytoken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.confirm }]);
+                Lc.replyMessage(Event.replyToken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.confirm }]);
             }
         }
 
-        if (Posttext == "書込") {
+        if (Event.message.text == "書込") {
             let db = SpreadSheetsSQL.open(BookId, "usrdata.db");
             let udata = db.select(["id", "value"]).filter("id = terminal_status").result();
             let func = new f2_writeout_manregi();
@@ -75,30 +70,30 @@ function doPost(e) {
                 nMessage = `[通知]^記帳されませんでした.`;
             }
             nMessage = spchar(sptrim(nMessage));
-            lc.replyMessage(replytoken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
+            Lc.replyMessage(Event.replyToken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
         }
 
-        if (Posttext == "キャンセル") {
+        if (Event.message.text == "キャンセル") {
             let db = SpreadSheetsSQL.open(BookId, "usrdata.db");
             db.updateRows({ value: "", update: new Date() }, "id = terminal_status");
             nMessage = `[通知]^キャンセルされました.`;
             nMessage = spchar(sptrim(nMessage));
-            lc.replyMessage(replytoken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
+            Lc.replyMessage(Event.replyToken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
         }
 
-        if (Posttext == "修正") {
+        if (Event.message.text == "修正") {
             let db = SpreadSheetsSQL.open(BookId, "usrdata.db");
             let udata = db.select(["id", "value"]).filter("id = terminal_status").result();
             nMessage = `[通知]^編集してください.^ID = ${udata[0].value}^https://docs.google.com/spreadsheets/d/1wq5ziUHNjOtoVx5YSLeV8vpnGdenMic6B16uv0e-FrE/edit#gid=1928129199`;
             nMessage = spchar(sptrim(nMessage));
-            lc.replyMessage(replytoken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
+            Lc.replyMessage(Event.replyToken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
         }
 
         let Command = (function (str) { // return null | String "" ; str: "XXX::\n AAA=aaa\n BBB=bb"
             let s = str.split("::");
             if (s.length == 1) return null;
             return { hdr: s[0].trim(), arg: rpeol(s[1]) }
-        })(Posttext)
+        })(Event.message.text)
 
         if (Command == null) return;
 
@@ -111,7 +106,7 @@ function doPost(e) {
                 nMessage = `[通知]^設定が変更されました.^変更:^_` + changepoints.join(", ");
             }
             nMessage = spchar(nMessage);
-            lc.replyMessage(replytoken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
+            Lc.replyMessage(Event.replyToken, [{ type: 'text', text: nMessage, "quickReply": QuickReplyTemplates.standby }]);
         }
 
 

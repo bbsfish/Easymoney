@@ -97,7 +97,7 @@ function notification(trnsvalue, trnsshop, trnsdate, LineUserId, AccessToken) {
     const Vwdb = new MyDbms("ccview.mydbms");
     const Now = new Date();
     const Ymd = Now.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
-    const LnClient = new LineBotSDK.Client({ channelAccessToken: this.AccessToken });
+    const LnClient = new LineBotSDK.Client({ channelAccessToken: AccessToken });
     const Vwdatas = {
         today_sum: parseInt(Vwdb.select("today-sum")[3]),
         balance_avg: parseInt(Vwdb.select("this-m-balance-avg")[3]),
@@ -139,5 +139,5 @@ function notification(trnsvalue, trnsshop, trnsdate, LineUserId, AccessToken) {
       *当月残高の日割金額（本日含む）^
       >>_設定_|_記帳
     `;
-    LnClient.pushMessage(this.LineUserId, { type: 'text', text: spchar(sptrim(t)), "quickReply": QuickReplyTemplates.standby });
+    LnClient.pushMessage(LineUserId, { type: 'text', text: spchar(sptrim(t)), "quickReply": QuickReplyTemplates.standby });
 }
