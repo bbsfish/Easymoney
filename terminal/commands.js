@@ -3,6 +3,7 @@ const commands = [
     {
         callname: "設定",
         calling: function (book_id = "") {
+            const MyStr = new MyString();
             const Mydb = new MyDbms(book_id, "usrdata.db");
             const Ids = ["card_limit", "todays_limit"];
             let arr = Ids.map((v) => {
@@ -13,15 +14,15 @@ const commands = [
             return {
                 lineNotification: {
                     flag: true,
-                    message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }
+                    message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.standby }
                 },
                 text: ""
             }
         },
         execute: function (book_id = "", arg = "") {   // arg = "aaa=x\n bbb=y"
+            const MyStr = new MyString();
             const Mydb = new MyDbms(book_id, "usrdata.db");
             const Ids = ["card_limit", "todays_limit"];
-            const MyStr = new MyString();
             let options = MyStr.sptrim(arg).match(/.+=.+/g); // = ["aaa=x", "bbb=y"]
             if (options == null) throw new Error("該当する設定キーが見つかりません");
             let opsKeys = [];
@@ -49,7 +50,7 @@ const commands = [
             return {
                 lineNotification: {
                     flag: true,
-                    message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }
+                    message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.standby }
                 },
                 text: ""
             }
@@ -59,6 +60,7 @@ const commands = [
     {
         callname: "記帳",
         calling: function (book_id = "") {
+            const MyStr = new MyString();
             const Rcq = SpreadSheetsSQL.open(book_id, "recordque.db");
             let r = Rcq.select(["id", "update", "date", "value", "shop", "data_type", "expense_for",
                 "comment", "gnlc_symbol", "written"]).filter("written = 0").result();
@@ -67,7 +69,7 @@ const commands = [
                 return {
                     lineNotification: {
                         flag: true,
-                        message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }
+                        message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.standby }
                     },
                     text: ""
                 }
@@ -80,7 +82,7 @@ const commands = [
                     r[0].value,
                     r[0].expense_for,
                     r[0].comment,
-                    quedata["data_type"]
+                    r[0].data_type
                 ];
                 let message = `
                     [記帳]^書き込み待ちのデータが${n}件あります.^
@@ -97,16 +99,17 @@ const commands = [
                 return {
                     lineNotification: {
                         flag: true,
-                        message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.confirm }
+                        message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.confirm }
                     },
                     text: ""
                 }
             }
         },
         execute: function (book_id = "", arg = "") {
+            const MyStr = new MyString();
             const Mydb = new MyDbms(book_id, "usrdata.db");
             if (arg == "書込") {
-                let ready_id = Mydb.select("terminal_status");
+                let ready_id = (Mydb.select("terminal_status"))[3];
                 const Rcq = SpreadSheetsSQL.open(book_id, "recordque.db");
                 let r = Rcq.select(["id", "update", "date", "value", "shop", "data_type", "expense_for",
                     "comment", "gnlc_symbol", "written"]).filter(`id = ${ready_id}`).result();
@@ -122,23 +125,23 @@ const commands = [
                     Ss.appendRow(arr);
                     Rcq.updateRows({ written: "1", update: dd }).filter(`id = ${ready_id}`);
                     const Ss2 = SpreadsheetApp.openById(book_id).getSheetByName("recordque.db");
-                    let n = ss.getRange("M1").getValue();
+                    let n = Ss2.getRange("M1").getValue();
                     let message = (n > 0)
                         ? `[通知]^記帳されました.(${ready_id})^*_書き込み待ちのデータが残っています.`
                         : `[通知]^記帳されました.(${ready_id})^*_書き込み待ちのデータはありません.`;
                     return {
                         lineNotification: {
                             flag: true,
-                            message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }
+                            message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.standby }
                         },
                         text: ""
                     }
                 } catch (error) {
-                    let message = `[通知]^記帳されませんでした.`;
+                    let message = `[通知]^記帳されませんでした. ${error.message}`;
                     return {
                         lineNotification: {
                             flag: true,
-                            message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }
+                            message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.standby }
                         },
                         text: ""
                     }
@@ -154,7 +157,7 @@ const commands = [
                 return {
                     lineNotification: {
                         flag: true,
-                        message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }
+                        message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.standby }
                     },
                     text: ""
                 }
@@ -165,7 +168,7 @@ const commands = [
                 return {
                     lineNotification: {
                         flag: true,
-                        message: { type: 'text', text: spchar(message), "quickReply": QuickReplyTemplates.standby }
+                        message: { type: 'text', text: MyStr.spchars(MyStr.sptrim(message)), "quickReply": QuickReplyTemplates.standby }
                     },
                     text: ""
                 }

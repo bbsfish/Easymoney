@@ -30,7 +30,7 @@ class MyString {
   // 改行文字置き換え（削除）
   repEol(text = this.str, delete_mode = false) {
     if (delete_mode) {
-      this.str = str.replace(/\r?\n/g, "");
+      this.str = text.replace(/\r?\n/g, "");
     } else {
       this.str = text.replace(/\r?\n/g, "^");
     }
@@ -38,7 +38,7 @@ class MyString {
   }
 
   sptrim(text = this.str) {
-    this.str = str.replace(/\s+/g, "");
+    this.str = text.replace(/ /g, "");
     return this.str;
   }
 }

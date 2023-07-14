@@ -1,8 +1,9 @@
-Logger = BetterLog.useSpreadsheet("your-spread-sheet-id-for-logging");
-
 function doPost(e) {
     const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
     const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
+    Logger = BetterLog.useSpreadsheet(BookId);
+    const MyStr = new MyString();
+
     try {
         if (e == undefined) throw new Error("doPost().Err: 空の e オブジェクト");
         Logger.log("doPost().GetPOST: %s", e);
@@ -10,7 +11,6 @@ function doPost(e) {
         if (Event.message.type != "text") throw new Error("doPost().Err: 未対応のイベントタイプ");
         const Lc = new LineBotSDK.Client({ channelAccessToken: AccessToken });
         
-        const MyStr = new MyString(Event.message.text);
         let m = Event.message.text.match(/^.+(?=::)/);
         if (m==null) { // m = "{CALLNAME}"
             let s = MyStr.sptrim(Event.message.text);
@@ -35,6 +35,7 @@ function doPost(e) {
                 }
                 break;
             }
+            return;
         }
     } catch (e) {
         e = (typeof e === "string") ? new Error(e) : e;

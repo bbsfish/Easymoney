@@ -26,7 +26,7 @@ const QuickReplyTemplates = {
                 "action": {
                     "type": "message",
                     "label": "書込",
-                    "text": "書込"
+                    "text": "記帳::書込"
                 }
             },
             {
@@ -34,7 +34,7 @@ const QuickReplyTemplates = {
                 "action": {
                     "type": "message",
                     "label": "修正",
-                    "text": "修正"
+                    "text": "記帳::修正"
                 }
             },
             {
@@ -42,7 +42,7 @@ const QuickReplyTemplates = {
                 "action": {
                     "type": "message",
                     "label": "キャンセル",
-                    "text": "キャンセル"
+                    "text": "記帳::キャンセル"
                 }
             }
         ]
