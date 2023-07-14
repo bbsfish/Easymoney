@@ -1,9 +1,10 @@
 function checkNewMailv3() {
     const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
-    const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
     const LineUserId = PropertiesService.getScriptProperties().getProperty("LINE_USER_ID");
+    const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
 
     const GmailAppQuery = 'subject:"ご利用のお知らせ【三井住友カード】"';
+    const MailKeyword = 'ご利用カード：Ｏｌｉｖｅ／クレジット';
     const GmailSreadLimit = 3;      // 取得するメール検索結果のスレッド数
     const Offset_DataType = "olive"; // [F] データ種別 
     const Offset_GnlcSymbol = "S";   // [G] 汎用記号
@@ -21,7 +22,7 @@ function checkNewMailv3() {
                 let mBody = m.getPlainBody();
 
                 // メールの内容から、対象のメールか判断
-                if (mBody.indexOf("ご利用カード：Ｏｌｉｖｅ／クレジット") === -1) continue;
+                if (mBody.indexOf(MailKeyword) === -1) continue;
 
                 // 情報の取得
                 let trnsdate = (function (t) { // 利用日
@@ -74,10 +75,7 @@ function checkNewMailv3() {
                     "gnlc_symbol": Offset_GnlcSymbol
                 }
                 Rcdb.insertRows([insertQuery]);
-
-                const LnNt = new LineNotification();
-                LnNt.notification(trnsvalue, trnsshop, trnsdate);
-
+                notification(trnsvalue, trnsshop, trnsdate, LineUserId, AccessToken);
                 // for End
             }
         }
@@ -90,4 +88,54 @@ function checkNewMailv3() {
         );
         throw e;
     }
+}
+
+function notification(trnsvalue, trnsshop, trnsdate, LineUserId, AccessToken) {
+    const Weekchars = ["日", "月", "火", "水", "木", "金", "土"];
+    const Vwdb = new MyDbms("ccview.mydbms");
+    const Now = new Date();
+    const Ymd = Now.toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
+    const LnClient = new LineBotSDK.Client({ channelAccessToken: this.AccessToken });
+    const Vwdatas = {
+        today_sum: parseInt(Vwdb.select("today-sum")[3]),
+        balance_avg: parseInt(Vwdb.select("this-m-balance-avg")[3]),
+        this_m_sum: parseInt(Vwdb.select("this-m-sum")[3]),
+        this_m_balance: parseInt(Vwdb.select("this-m-balance")[3]),
+        this_m_avg: parseInt(Vwdb.select("this-m-avg")[3])
+    };
+    const Options = { style: "currency", currency: 'JPY', currencySign: "accounting" };
+    const Binds = [
+        trnsvalue.toLocaleString(),  // 利用金額
+        trnsshop, // 利用先
+        trnsdate.slice(0, 10) + "_" + trnsdate.slice(10), // 利用日
+        Ymd + "_－_" + Weekchars[Now.getDay()],  // yyyy/mm/dd - weekday
+        Vwdatas.today_sum.toLocaleString("ja-JP", Options), // 本日合計
+        (Vwdatas.balance_avg - Vwdatas.today_sum).toLocaleString("ja-JP", Options), // 本日残高　実績
+        Vwdatas.balance_avg.toLocaleString("ja-JP", Options), // 本日残高　目標
+        Ymd.slice(0, 7),  // yyyy/mm
+        Vwdatas.this_m_sum.toLocaleString("ja-JP", Options), // 当月合計
+        Vwdatas.this_m_balance.toLocaleString("ja-JP", Options), // 当月残高
+        Vwdatas.this_m_avg.toLocaleString("ja-JP", Options), // 当月日数の日割金額
+    ];
+    let t = `
+      [利用情報]^^
+      利用金額:_${Binds[0]}^
+      利用先!S:_${Binds[1]}^
+      利用日!S:_${Binds[2]}^
+      ―――――――――――――――――――^
+      #_${Binds[3]}^
+      本日^
+      !S合計:_${Binds[4]}^
+      !S残高:_${Binds[5]}_/_${Binds[6]}*^
+      ―――――――――――――――――――^
+      #_${Binds[7]}^
+      当月^
+      !S合計:_${Binds[8]}^
+      !S残高:_${Binds[9]}^
+      ―――――――――――――――――――^
+      当月日数の日割金額:_${Binds[10]}^
+      *当月残高の日割金額（本日含む）^
+      >>_設定_|_記帳
+    `;
+    LnClient.pushMessage(this.LineUserId, { type: 'text', text: spchar(sptrim(t)), "quickReply": QuickReplyTemplates.standby });
 }

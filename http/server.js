@@ -48,6 +48,9 @@ function show_cardbilling() {
 
 // When Get POST
 function doPost(e) {
+    const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
+    const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
+    const LineUserId = PropertiesService.getScriptProperties().getProperty("LINE_USER_ID");
     Logger.log("doPost().GetPOST: %s", e);
 
     if (String(e.parameters.datatype) == "card_billing_regi") {
