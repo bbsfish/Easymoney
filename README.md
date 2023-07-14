@@ -87,4 +87,4 @@ HTMLフォームから、データの手動記録を受け付けます。デー�
 | terminal_status  |                 | ターミナル状態   |       |
 
 # デプロイ
-- check_mail/check_new_mail.1/checkNewMailv3()を1分ごとに実行
+- check_mail/check_new_mail.js/checkNewMailv3()を1分ごとに実行

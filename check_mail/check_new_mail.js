@@ -1,3 +1,5 @@
+Logger = BetterLog.useSpreadsheet("your-spread-sheet-id-for-logging");
+
 function checkNewMailv3() {
     const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
     const LineUserId = PropertiesService.getScriptProperties().getProperty("LINE_USER_ID");

@@ -1,3 +1,5 @@
+Logger = BetterLog.useSpreadsheet("your-spread-sheet-id-for-logging");
+
 function doPost(e) {
     const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
     const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");

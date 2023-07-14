@@ -1,5 +1,9 @@
+Logger = BetterLog.useSpreadsheet("your-spread-sheet-id-for-logging");
+
 // Preview HTML
 function doGet(e) {
+    const AppRootUrl = "https://script.google.com/macros/s/AKfycbxFj8Uq7DuaCl6AWXcGEsaJVyNBa5tFW3KuhE_yICp4QfP0lfT5mB3OtRrG2sZxmf4/exec";
+
     Logger.log("doGet().GetGET: %s", e);
     try {
         let file = "index.html";
