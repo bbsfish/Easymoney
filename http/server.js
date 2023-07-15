@@ -1,31 +1,52 @@
 const BookId = PropertiesService.getScriptProperties().getProperty("SPREAD_SHEET_ID");
 const AccessToken = PropertiesService.getScriptProperties().getProperty("ACCESS_TOKEN");
 const LineUserId = PropertiesService.getScriptProperties().getProperty("LINE_USER_ID");
-Logger = BetterLog.useSpreadsheet("your-spread-sheet-id-for-logging");
+Logger = BetterLog.useSpreadsheet(BookId);
 const AppRootUrl = "https://script.google.com/macros/s/AKfycbxFj8Uq7DuaCl6AWXcGEsaJVyNBa5tFW3KuhE_yICp4QfP0lfT5mB3OtRrG2sZxmf4/exec";
 
 // Preview HTML
-function doGet(e) {
-    Logger.log("doGet().GetGET: %s", e);
-    try {
-        let file = "index.html";
-        if (e.parameter["pg"] !== undefined) {
-            if (e.parameter.pg == 2) {
-                file = "index2.html";
-            }
-        }
-        const Html = HtmlService.createTemplateFromFile(file);
-        if (e.parameter["pg"] !== undefined) {
-            if (e.parameter.pg == 2) {
+const HtmlFiles = [
+    {
+        // default
+        pg: "", file: "index.html",
+        parameters: {
+            statusStyle: "display: none",
+            statusMessage: "",
+            index: AppRootUrl,
+            cardbillingtables: function(){
                 let tablehtml = show_cardbilling();
-                console.log(tablehtml);
-                Html.cardbillingtables = tablehtml;
+                return tablehtml;
             }
         }
-        Html.statusStyle = "display: none";
-        Html.statusMessage = "";
-        Html.index = AppRootUrl;
-        return Html.evaluate();
+    },
+    {
+        pg: 2, file: "index2.html",
+        parameters: {
+            statusStyle: "display: none",
+            statusMessage: "",
+            index: AppRootUrl
+        }
+    }
+];
+
+function doGet(e) {
+    try {
+        if (e===undefined) throw new Error("e is undefined");
+
+        let pg = e.parameter["pg"];
+        let hf = (pg === undefined)
+            ? HtmlFiles[0] // no "pg" parameter
+            : (function(pg){
+                for (let hf of HtmlFiles) {
+                    if (hf.pg==pg) return hf;
+                }
+                return HtmlFiles[0];
+            })(pg);
+        let html = HtmlService.createTemplateFromFile(hf.file);
+        for (let key in hf.parameters) {
+            html[key] = hf.parameters.key;
+        }
+        return html.evaluate();
     } catch (e) {
         e = (typeof e === "string") ? new Error(e) : e;
         Logger.severe(
