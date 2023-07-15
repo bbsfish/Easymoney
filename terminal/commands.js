@@ -109,10 +109,10 @@ const commands = [
             const MyStr = new MyString();
             const Mydb = new MyDbms(book_id, "usrdata.db");
             if (arg == "書込") {
-                let ready_id = (Mydb.select("terminal_status"))[3];
+                const Ready_id = (Mydb.select("terminal_status"))[3];
                 const Rcq = SpreadSheetsSQL.open(book_id, "recordque.db");
                 let r = Rcq.select(["id", "update", "date", "value", "shop", "data_type", "expense_for",
-                    "comment", "gnlc_symbol", "written"]).filter(`id = ${ready_id}`).result();
+                    "comment", "gnlc_symbol", "written"]).filter(`id = ${Ready_id}`).result();
                 r = r[0];
                 try {
                     if (r == undefined) throw new Error("レコードキューに該当するデータがありません.");
@@ -123,12 +123,13 @@ const commands = [
                     let arr = [id2, dd, r.date, r.value, r.shop, r.data_type, r.expense_for,
                         r.comment, r.gnlc_symbol];
                     Ss.appendRow(arr);
-                    Rcq.updateRows({ written: "1", update: dd }).filter(`id = ${ready_id}`);
+                    Rcq.updateRows({ written: "1", update: dd }, `id = ${Ready_id}`);
+                    Logger.log("commands.execute: UpdateRows (id = %s)", Ready_id);
                     const Ss2 = SpreadsheetApp.openById(book_id).getSheetByName("recordque.db");
                     let n = Ss2.getRange("M1").getValue();
                     let message = (n > 0)
-                        ? `[通知]^記帳されました.(${ready_id})^*_書き込み待ちのデータが残っています.`
-                        : `[通知]^記帳されました.(${ready_id})^*_書き込み待ちのデータはありません.`;
+                        ? `[通知]^記帳されました.(${Ready_id})^*_書き込み待ちのデータが残っています.`
+                        : `[通知]^記帳されました.(${Ready_id})^*_書き込み待ちのデータはありません.`;
                     return {
                         lineNotification: {
                             flag: true,
@@ -149,7 +150,7 @@ const commands = [
             }
             if (arg == "キャンセル") {
                 Mydb.update("terminal_status", ["ターミナル状態", ""]);
-                const Ss3= SpreadsheetApp.openById(book_id).getSheetByName("recordque.db");
+                const Ss3 = SpreadsheetApp.openById(book_id).getSheetByName("recordque.db");
                 let n = Ss3.getRange("M1").getValue();
                 let message = (n > 0)
                     ? `[通知]^キャンセルされました.^*_書き込み待ちのデータが${n}件残っています.`
@@ -163,8 +164,8 @@ const commands = [
                 }
             }
             if (arg == "修正") {
-                let ready_id = Mydb.select("terminal_status");
-                let message = `[通知]^編集してください.^ID = ${ready_id}^https://docs.google.com/spreadsheets/d/1wq5ziUHNjOtoVx5YSLeV8vpnGdenMic6B16uv0e-FrE/edit#gid=1928129199`;
+                const Ready_id = Mydb.select("terminal_status");
+                let message = `[通知]^編集してください.^ID = ${Ready_id}^https://docs.google.com/spreadsheets/d/1wq5ziUHNjOtoVx5YSLeV8vpnGdenMic6B16uv0e-FrE/edit#gid=1928129199`;
                 return {
                     lineNotification: {
                         flag: true,
