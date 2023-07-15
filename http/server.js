@@ -12,11 +12,7 @@ const HtmlFiles = [
         parameters: {
             statusStyle: "display: none",
             statusMessage: "",
-            index: AppRootUrl,
-            cardbillingtables: function(){
-                let tablehtml = show_cardbilling();
-                return tablehtml;
-            }
+            index: AppRootUrl
         }
     },
     {
@@ -24,27 +20,47 @@ const HtmlFiles = [
         parameters: {
             statusStyle: "display: none",
             statusMessage: "",
-            index: AppRootUrl
+            index: AppRootUrl,
+            cardbillingtables: function () {
+                const Mydb = new MyDbms(BookId, "ccview.mydbms");
+                const Cbdb = SpreadSheetsSQL.open(BookId, "cardbilling.db");
+                const serialv = Mydb.select("serialv-50");
+                const data = Cbdb.select(
+                    ["card_name", "billing_total", "withdrawal_date", "comment", "status"]
+                ).filter("withdrawal_date > " + serialv[3]).orderBy(["withdrawal_date"]).result();
+                if (!data.length) return `<p class="notion">データはありません</p>`;
+                let tableArr = data.map((d) => {
+                    return `<table><thead><tr><th colspan='2'>${d.card_name}</th></tr><tr><th width='180px'></th><th width='270px'></th></tr></thead>
+                  <tbody> <tr><th>請求金額</th><td class='cell-y'>${Number(d.billing_total).toLocaleString()}</td></tr>
+                  <tr><th>引落日</th><td>${new Date(d.withdrawal_date).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" })}</td></tr>
+                  <tr><th>コメント</th><td>${d.comment}</td></tr> </tbody></table>`;
+                });
+                return tableArr.join("");
+            }
         }
     }
 ];
 
 function doGet(e) {
     try {
-        if (e===undefined) throw new Error("e is undefined");
+        if (e === undefined) throw new Error("e is undefined");
 
         let pg = e.parameter["pg"];
         let hf = (pg === undefined)
             ? HtmlFiles[0] // no "pg" parameter
-            : (function(pg){
+            : (function (pg) {
                 for (let hf of HtmlFiles) {
-                    if (hf.pg==pg) return hf;
+                    if (hf.pg == pg) return hf;
                 }
                 return HtmlFiles[0];
             })(pg);
         let html = HtmlService.createTemplateFromFile(hf.file);
-        for (let key in hf.parameters) {
-            html[key] = hf.parameters.key;
+        for (let prmkey in hf.parameters) {
+            if (typeof hf.parameters[prmkey] == "function") {
+                html[prmkey] = hf.parameters[prmkey]();
+            } else {
+                html[prmkey] = hf.parameters[prmkey];
+            }
         }
         return html.evaluate();
     } catch (e) {
@@ -54,23 +70,6 @@ function doGet(e) {
             e.name || "", e.message || "", e.lineNumber || "", e.fileName || "", e.stack || ""
         );
     }
-}
-
-function show_cardbilling() {
-    let result_html = "";
-    let Mydb = new MyDbms(BookId, "ccview.mydbms");
-    let serialValue = Mydb.select("serialv-50");
-    let db = SpreadSheetsSQL.open(BookId, "cardbilling.db");
-    let data = db.select(["card_name", "billing_total", "withdrawal_date", "comment", "status"]).filter("withdrawal_date > " + serialValue[3]).orderBy(["withdrawal_date"]).result();
-    if (data[0] == "") return "<p>データはありません</p>";
-    data.forEach(r => {
-        result_html += `
-        <table><thead><tr><th colspan='2'>${r.card_name}</th></tr><tr><th width='180px'></th><th width='270px'></th></tr></thead>
-          <tbody> <tr><th>請求金額</th><td class='cell-y'>${Number(r.billing_total).toLocaleString()}</td></tr>
-            <tr><th>引落日</th><td>${new Date(r.withdrawal_date).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" })}</td></tr>
-            <tr><th>コメント</th><td>${r.comment}</td></tr> </tbody></table>`;
-    });
-    return result_html;
 }
 
 // When Get POST
@@ -249,4 +248,3 @@ function card_billing_regi(e) {
         return Html.evaluate();
     }
 }
-
